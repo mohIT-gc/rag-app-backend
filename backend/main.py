@@ -24,7 +24,7 @@ config_store = {
 }
 
 origins = [
-    "https://<your-angular-app-name>.azurestaticapps.net", # Your Angular URL
+    "https://purple-meadow-08d99360f.3.azurestaticapps.net", # Your Angular URL
     "http://localhost:4200", # Optional: for local development testing
 ]
 
