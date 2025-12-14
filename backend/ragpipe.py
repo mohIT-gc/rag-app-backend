@@ -18,6 +18,7 @@ def setConfig():
         deployment=os.getenv("OPENAI_EMBED_DEPLOYMENT"),
         model="text-embedding-3-small",
         openai_api_version=os.getenv("OPENAI_API_VERSION"),
+        api_key=os.getenv("OPENAI_API_KEY"),
     )
     
     vector_store = Chroma(
