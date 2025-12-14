@@ -1,6 +1,6 @@
 import os
 from typing import List
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import shutil
@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from .ragpipe import index_documents, UPLOAD_DIR, query_qa, setConfig
+from .ragpipe import index_documents, UPLOAD_DIR, query_qa
 
 app = FastAPI(title="RAG Backend")
 
@@ -42,7 +42,7 @@ async def startup_event():
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.post("/upload")
-async def upload(files: List[UploadFile] = File(...)):
+async def upload(files: List[UploadFile] = File(...), embedName: str= Form(...), apiversion: str= Form(...), apikey: str= Form(...), collectionname: str= Form(...), azureEndpoint: str= Form(...)):
     saved_paths = []
     for f in files:
         dest = os.path.join(UPLOAD_DIR, f.filename)
@@ -55,17 +55,25 @@ async def upload(files: List[UploadFile] = File(...)):
 
     # Index in background
     loop = asyncio.get_event_loop()
-    loop.run_in_executor(None, index_documents, saved_paths)
+    loop.run_in_executor(None, index_documents, saved_paths, embedName, apiversion, apikey, collectionname, azureEndpoint)
 
     return JSONResponse({"ok": True, "files": [os.path.basename(p) for p in saved_paths]})
 
 @app.post("/query")
 async def query(payload: dict):
     question = payload.get("question")
+    embedName= payload.get("embedName")
+    apiversion = payload.get("apiversion") 
+    apikey = payload.get("apikey")
+    collectionname = payload.get("collectionname")
+    chatname = payload.get("chatname")
+    endpoint = payload.get("endpoint")
+    print("*****")
+    print(chatname)
     if not question:
         raise HTTPException(status_code=400, detail="'question' is required")
 
-    answer, sources = await asyncio.get_event_loop().run_in_executor(None, query_qa, question)
+    answer, sources = await asyncio.get_event_loop().run_in_executor(None, query_qa, question, embedName, apiversion, apikey, collectionname, chatname, endpoint)
     return {"answer": answer, "sources": sources}
 
 @app.post("/config")

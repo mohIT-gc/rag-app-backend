@@ -13,24 +13,25 @@ load_dotenv()
 
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
 
-def setConfig():
+def setAllConfig(embedName: str, apiversion: str, apikey: str, collectionname: str, azureEndpoint: str):
     print("**********************************************")
-    print(os.getenv("OPENAI_API_KEY"))
+    print(embedName, apiversion, apikey, collectionname)
     print(os.environ.get("AZURE_OPENAI_API_KEY"))
     print("**********************************************")
     embeddings = AzureOpenAIEmbeddings(
-        deployment=os.getenv("OPENAI_EMBED_DEPLOYMENT"),
+        deployment=embedName,
         model="text-embedding-3-small",
-        openai_api_version=os.getenv("OPENAI_API_VERSION"),
-        api_key=os.getenv("OPENAI_API_KEY"),
+        openai_api_version=apiversion,
+        api_key=apikey,
+        azure_endpoint=azureEndpoint
     )
     
     vector_store = Chroma(
-        collection_name=os.getenv("CHROMA_COLLECTION_NAME", "rag-collection"),
+        collection_name=collectionname,
         embedding_function=embeddings,
-        chroma_cloud_api_key=os.getenv("CHROMA_API_KEY"),
-        tenant=os.getenv("CHROMA_TENANT"),
-        database=os.getenv("CHROMA_DATABASE"),
+        chroma_cloud_api_key="ck-3jRzkSTiS6DagyR7QPtgTz67cjgw11aZjV85WstutzWn",
+        tenant="1860447b-3aa0-4821-9244-98baa592b7a4",
+        database="dev",
         create_collection_if_not_exists=True,
     )
     return embeddings, vector_store
@@ -39,8 +40,8 @@ def setConfig():
 def get_loader(file_path: str):
     return PyPDFLoader(file_path)    
 
-def process_document_and_index(file_path: str) -> int:
-    embeddings, vector_store = setConfig()
+def process_document_and_index(file_path: str, embedName: str, apiversion: str, apikey: str, collectionname: str, azureEndpoint: str) -> int:
+    embeddings, vector_store = setAllConfig(embedName, apiversion, apikey, collectionname, azureEndpoint)
     loader = get_loader(file_path)
     documents = loader.load()
 
@@ -55,12 +56,12 @@ def process_document_and_index(file_path: str) -> int:
     
     return len(all_splits)
 
-def index_documents(file_paths: List[str]) -> None:
+def index_documents(file_paths: List[str], embedName: str, apiversion: str, apikey: str, collectionname: str, azureEndpoint: str) -> None:
     for path in file_paths:
-        process_document_and_index(path)
+        process_document_and_index(path, embedName, apiversion, apikey, collectionname, azureEndpoint)
         
-def query_qa(question: str, k: int = 4) -> Tuple[str, List[dict]]:
-    embeddings, vector_store = setConfig()
+def query_qa(question: str, embedName: str, apiversion: str, apikey: str, collectionname: str, chatname: str, endpoint: str, k: int = 4) -> Tuple[str, List[dict]]:
+    embeddings, vector_store = setAllConfig(embedName, apiversion, apikey, collectionname, endpoint)
     docs: List[Document] = vector_store.similarity_search(question, k=k)
     
     if not docs:
@@ -68,8 +69,9 @@ def query_qa(question: str, k: int = 4) -> Tuple[str, List[dict]]:
 
     context = "\n\n".join([d.page_content for d in docs])
     sources = [d.metadata for d in docs]
-
-    llm = AzureChatOpenAI(azure_deployment= os.getenv("OPENAI_CHAT_DEPLOYMENT"), api_version= os.getenv("OPENAI_CHAT_API_VERSION"),temperature=0)
+    print(chatname)
+    print(embedName)
+    llm = AzureChatOpenAI(azure_endpoint= endpoint, api_key= apikey, azure_deployment= chatname, api_version= apiversion, temperature=0)
     prompt = f"Use the following context to answer the question. If the answer is not contained, say you don't know.\n\nContext:\n{context}\n\nQuestion:\n{question}\n\nAnswer concisely and cite sources by filename."
 
     resp = llm.invoke(prompt)
