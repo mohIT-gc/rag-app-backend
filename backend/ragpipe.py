@@ -14,6 +14,10 @@ load_dotenv()
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
 
 def setConfig():
+    print("**********************************************")
+    print(os.getenv("OPENAI_API_KEY"))
+    print(os.environ.get("AZURE_OPENAI_API_KEY"))
+    print("**********************************************")
     embeddings = AzureOpenAIEmbeddings(
         deployment=os.getenv("OPENAI_EMBED_DEPLOYMENT"),
         model="text-embedding-3-small",
