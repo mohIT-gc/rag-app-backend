@@ -14,9 +14,7 @@ python -m venv .venv; .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-2. Copy `.env.example` to `.env` and fill your credentials (Azure OpenAI endpoint, key, etc.)
-
-3. Run the server:
+2. Run the server:
 
 ```powershell
 uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
@@ -24,5 +22,15 @@ uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 
 Notes
 
-- This starter uses local FAISS vectorstore for development. For Azure deployment replace the vector store with Azure Cognitive Search.
+- If Angular UI deployed into new Azure Static Web App, configure the frontend url in main.py origins section.
+  by default, keep the origins unchanged [https://purple-meadow-08d99360f.3.azurestaticapps.net]
+```powershell
+origins = [
+    "https://{your_angular_ui_app_name}.azurestaticapps.net", # Your Angular URL
+    ......
+]
+```
 
+The project code  can be accessed through github [https://github.com/mohIT-gc/rag-app-backend]
+Deployed Azure Web App for backend service URL
+[https://gmuece553-team4-rag-backend-a2fghsejh3awbncp.canadacentral-01.azurewebsites.net]
