@@ -97,6 +97,7 @@ async def set_config(payload: dict):
 
         os.environ["AZURE_OPENAI_ENDPOINT"] = config_store["azureEndpoint"]
         os.environ["OPENAI_API_KEY"] = config_store["azureApiKey"]
+        os.environ["AZURE_OPENAI_API_KEY"] = config_store["azureApiKey"]
         os.environ["OPENAI_API_TYPE"] = "azure"
         os.environ["OPENAI_API_VERSION"] = config_store["embedModelApiVersion"]
         os.environ["OPENAI_EMBED_DEPLOYMENT"] = config_store["embeddingDeploymentName"]
